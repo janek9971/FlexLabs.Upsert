@@ -16,6 +16,7 @@
             {
                 new InMemoryUpsertCommandRunner(),
                 new MySqlUpsertCommandRunner(),
+                new OracleUpsertCommandRunner(),
                 new PostgreSqlUpsertCommandRunner(),
                 new SqlServerUpsertCommandRunner(),
                 new SqliteUpsertCommandRunner(),
