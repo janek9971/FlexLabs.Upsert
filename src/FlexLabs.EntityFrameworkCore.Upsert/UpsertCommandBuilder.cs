@@ -206,5 +206,12 @@ namespace FlexLabs.EntityFrameworkCore.Upsert
             var commandRunner = GetCommandRunner();
             return commandRunner.RunAsync(_dbContext, _entityType, _entities, _matchExpression, _updateExpression, _updateCondition, _queryOptions, token);
         }
+        public Task<int> RunWithTransactionAsync(CancellationToken token = default)
+        {
+            if (_entities.Count == 0)
+                return Task.FromResult(0);
+            var commandRunner = GetCommandRunner();
+            return commandRunner.RunWithTransactionAsync(_dbContext, _entityType, _entities, _matchExpression, _updateExpression, _updateCondition, _queryOptions, _dbContext.Database.CurrentTransaction?.GetDbTransaction(), token);
+        }
     }
 }

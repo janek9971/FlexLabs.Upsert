@@ -29,7 +29,7 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
         /// <param name="updateExpressions">The expressions that represent update commands for matched entities</param>
         /// <param name="updateCondition">The expression that tests whether existing entities should be updated</param>
         /// <returns>A fully formed database query</returns>
-        public abstract string GenerateCommand(string tableName, ICollection<ICollection<(string ColumnName, ConstantValue Value, string DefaultSql, bool AllowInserts)>> entities,
+        public abstract string GenerateCommand(string tableName, ICollection<ICollection<(string ColumnName, ConstantValue Value, string? DefaultSql, bool AllowInserts)>> entities,
             ICollection<(string ColumnName, bool IsNullable)> joinColumns, ICollection<(string ColumnName, IKnownValue Value)>? updateExpressions,
             KnownExpression? updateCondition);
         /// <summary>
@@ -170,7 +170,7 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
                         var allowInserts = p.ValueGenerated == ValueGenerated.Never || p.GetAfterSaveBehavior() == PropertySaveBehavior.Save;
                         return (columnName, value, defaultSql, allowInserts);
                     })
-                    .ToArray() as ICollection<(string ColumnName, ConstantValue Value, string DefaultSql, bool AllowInserts)>)
+                    .ToArray() as ICollection<(string ColumnName, ConstantValue Value, string? DefaultSql, bool AllowInserts)>)
                 .ToArray();
 
             var entitiesProcessed = 0;
@@ -245,7 +245,7 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
         /// <param name="expression">The KnownExpression that has to be converted to database language</param>
         /// <param name="expandLeftColumn">Override the way the table column names are rendered</param>
         /// <returns>A string containing the expression converted to database language</returns>
-        protected virtual string ExpandExpression(KnownExpression expression, Func<string, string>? expandLeftColumn = null)
+        protected virtual string ExpandExpression(KnownExpression? expression, Func<string, string>? expandLeftColumn = null)
         {
             if (expression == null)
                 throw new ArgumentNullException(nameof(expression));
@@ -400,6 +400,35 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
                 using var dbCommand = dbContext.Database.GetDbConnection().CreateCommand();
                 var dbArguments = arguments.Select(a => PrepareDbCommandArgument(dbCommand, relationalTypeMappingSource, a));
                 result += await dbContext.Database.ExecuteSqlRawAsync(sqlCommand, dbArguments, cancellationToken).ConfigureAwait(false);
+            }
+            return result;
+        }
+
+        /// <inheritdoc />
+        public override async Task<int> RunWithTransactionAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities,
+            Expression<Func<TEntity, object>>? matchExpression, Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition,
+            RunnerQueryOptions queryOptions, DbTransaction? dbTransaction, CancellationToken cancellationToken)
+        {
+            if (dbContext == null)
+                throw new ArgumentNullException(nameof(dbContext));
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+            if (dbTransaction == null) throw new ArgumentNullException(nameof(dbTransaction));
+
+            var relationalTypeMappingSource = dbContext.GetService<IRelationalTypeMappingSource>();
+            var commands = PrepareCommand(entityType, entities, matchExpression, updateExpression, updateCondition, queryOptions);
+
+            int result = 0;
+            foreach (var (sqlCommand, arguments) in commands)
+            {
+                var dbCommand = dbContext.Database.GetDbConnection().CreateCommand();
+                await using var _ = dbCommand.ConfigureAwait(false);
+                {
+                    dbCommand.Transaction = dbTransaction;
+                    var dbArguments = arguments.Select(a => PrepareDbCommandArgument(dbCommand, relationalTypeMappingSource, a));
+                    result += await dbContext.Database.ExecuteSqlRawAsync(sqlCommand, dbArguments, cancellationToken).ConfigureAwait(false);
+                }
+     
             }
             return result;
         }

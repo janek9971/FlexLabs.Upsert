@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -27,6 +28,11 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
         /// <inheritdoc/>
         public abstract Task<int> RunAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities, Expression<Func<TEntity, object>>? matchExpression,
             Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition, RunnerQueryOptions queryOptions,
+            CancellationToken cancellationToken) where TEntity : class;
+
+        /// <inheritdoc />
+        public abstract Task<int> RunWithTransactionAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities, Expression<Func<TEntity, object>>? matchExpression,
+            Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition, RunnerQueryOptions queryOptions, DbTransaction? dbTransaction,
             CancellationToken cancellationToken) where TEntity : class;
 
         /// <summary>

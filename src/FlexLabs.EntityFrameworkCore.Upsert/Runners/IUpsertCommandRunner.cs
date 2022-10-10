@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,6 +51,23 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
         /// <returns>The task that represents the asynchronous upsert operation</returns>
         Task<int> RunAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities, Expression<Func<TEntity, object>>? matchExpression,
             Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition, RunnerQueryOptions queryOptions,
+            CancellationToken cancellationToken) where TEntity : class;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <param name="entityType"></param>
+        /// <param name="entities"></param>
+        /// <param name="matchExpression"></param>
+        /// <param name="updateExpression"></param>
+        /// <param name="updateCondition"></param>
+        /// <param name="queryOptions"></param>
+        /// <param name="dbTransaction"></param>
+        /// <param name="cancellationToken"></param>
+        /// <typeparam name="TEntity"></typeparam>
+        /// <returns></returns>
+        Task<int> RunWithTransactionAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities, Expression<Func<TEntity, object>>? matchExpression,
+            Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition, RunnerQueryOptions queryOptions, DbTransaction? dbTransaction,
             CancellationToken cancellationToken) where TEntity : class;
     }
 }
