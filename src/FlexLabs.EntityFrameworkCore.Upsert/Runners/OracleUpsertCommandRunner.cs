@@ -51,16 +51,9 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
             result.Append(string.Join(", ", entities.First().Where(e => e.AllowInserts).Select(e => $"{SourcePrefix}" + EscapeName(e.ColumnName))));
             result.Append(')');
             if (updateExpressions == null) return result.ToString();
-
             result.Append(" WHEN MATCHED");
-
             result.Append(" THEN UPDATE SET ");
-
-            var test = System.Text.Json.JsonSerializer.Serialize(updateExpressions);
-            var value = string.Join(", ",
-                updateExpressions.Select((e, i) => $"{EscapeName(e.ColumnName)} = {ExpandValue(e.Value)}"));
-            result.Append(value);
-
+            result.Append(string.Join(", ", updateExpressions.Select((e, i) => $"{EscapeName(e.ColumnName)} = {ExpandValue(e.Value)}")));
             if (updateCondition != null)
                 result.Append(invariantCulture, $" WHERE {ExpandExpression(updateCondition)}");
             return result.ToString();
