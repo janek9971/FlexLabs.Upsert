@@ -1,77 +1,83 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
-    <LangVersion>latest</LangVersion>
-    <NeutralLanguage>en</NeutralLanguage>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-    <Authors>Artiom Chilaru</Authors>
-    <Company>Artiom Chilaru</Company>
-    <Description>Adds basic support for "Upsert" operations to EF Core.
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<LangVersion>latest</LangVersion>
+		<NeutralLanguage>en</NeutralLanguage>
+		<Nullable>enable</Nullable>
+		<Version>6.0.3</Version>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<EnableNETAnalyzers>true</EnableNETAnalyzers>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<Authors>Artiom Chilaru</Authors>
+		<Company>Artiom Chilaru</Company>
+		<Description>Credits to: Artiom Chilaru
 
-Uses `INSERT … ON CONFLICT DO UPDATE` in PostgreSQL/Sqlite, `MERGE` in SqlServer and `INSERT INTO … ON DUPLICATE KEY UPDATE` in MySQL.
+Adds basic support for "Upsert" operations to EF Core.
 
-Also supports injecting sql command generators to add support for other providers</Description>
-    <Copyright>Artiom Chilaru © 2019</Copyright>
-    <PackageProjectUrl>https://github.com/artiomchi/FlexLabs.Upsert</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/artiomchi/FlexLabs.Upsert</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>Entity Framework Core entity-framework-core EF EntityFramework EntityFrameworkCore EFCore Upsert</PackageTags>
-    <VersionPrefix>6.0.1</VersionPrefix>
-    <PackageReleaseNotes>
-v6.0.0
-+ Adding support for EF Core 6
-+ Handling UseIdentityAlwaysColumn columns
+Also supports injecting sql command generators to add support for other providers
 
-v5.0.0
-! Fixing the library versioning. From now one, one version of the library depends on one version of EF Core, for all supported target frameworks
+Added OracleRunner by Krzysztof Jankowski</Description>
+		<Copyright>Artiom Chilaru © 2019</Copyright>
+		<PackageProjectUrl>https://github.com/janek9971/FlexLabs.Upsert</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/artiomchi/FlexLabs.Upsert</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageTags>Entity Framework Core entity-framework-core EF EntityFramework EntityFrameworkCore EFCore Upsert</PackageTags>
+		<VersionPrefix>6.0.1</VersionPrefix>
+		<PackageReleaseNotes>
+			v6.0.0
+			+ Adding support for EF Core 6
+			+ Handling UseIdentityAlwaysColumn columns
 
-v4.0.1
-! Patching some MySql conditional update queries
+			v5.0.0
+			! Fixing the library versioning. From now one, one version of the library depends on one version of EF Core, for all supported target frameworks
 
-v4.0.0
-+ Adding support for .NET 5 and EF Core 5
-! Patched support for constants in the update condition
-! Run and RunAsync will not return all rows affected when command was split into multiple batches, not just the last batch's row count
-! Patching the extension method to replace/inject custom command runner
-! Removed old extension method on IServiceCollection, since it wasn't working anyway
-    </PackageReleaseNotes>
-  </PropertyGroup>
+			v4.0.1
+			! Patching some MySql conditional update queries
 
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <DebugType>embedded</DebugType>
-    <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\certs\FlexLabsStrongKey.snk</AssemblyOriginatorKeyFile>
-    <SignCertificateName>Artiom Chilaru</SignCertificateName>
-    <PostBuildEvent>signtool.exe sign /n "$(SignCertificateName)" /fd sha256 /tr "http://timestamp.digicert.com" /td sha256 FlexLabs.EntityFrameworkCore.Upsert.dll</PostBuildEvent>
-  </PropertyGroup>
+			v4.0.0
+			+ Adding support for .NET 5 and EF Core 5
+			! Patched support for constants in the update condition
+			! Run and RunAsync will not return all rows affected when command was split into multiple batches, not just the last batch's row count
+			! Patching the extension method to replace/inject custom command runner
+			! Removed old extension method on IServiceCollection, since it wasn't working anyway
+		</PackageReleaseNotes>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
+		<NuGetPublishType>remote</NuGetPublishType>
+		<NuGetPublishLocation>NugetNexusPrivate</NuGetPublishLocation>
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<EmbedUntrackedSources>true</EmbedUntrackedSources>
+		<DebugType>embedded</DebugType>
+	</PropertyGroup>
 
-  <ItemGroup Condition="'$(Configuration)'=='Release'">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.7" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup Condition="'$(Configuration)'=='Release'">
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="SS.NuGet.Publish" Version="1.0.1912.22">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Resources.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Resources.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Resources.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+			<LastGenOutput>Resources.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>

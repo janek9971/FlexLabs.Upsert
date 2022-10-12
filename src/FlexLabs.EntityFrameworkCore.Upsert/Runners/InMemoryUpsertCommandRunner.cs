@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -157,6 +158,23 @@ namespace FlexLabs.EntityFrameworkCore.Upsert.Runners
 
             RunCore(dbContext, entityType, entities, matchExpression, updateExpression, updateCondition, queryOptions);
             return dbContext.SaveChangesAsync(cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public override async Task<int> RunWithTransactionAsync<TEntity>(DbContext dbContext, IEntityType entityType, ICollection<TEntity> entities,
+            Expression<Func<TEntity, object>>? matchExpression, Expression<Func<TEntity, TEntity, TEntity>>? updateExpression, Expression<Func<TEntity, TEntity, bool>>? updateCondition,
+            RunnerQueryOptions queryOptions, DbTransaction? dbTransaction, CancellationToken cancellationToken)
+        {
+            if (dbContext is null)
+                throw new ArgumentNullException(nameof(dbContext));
+            if (entityType == null)
+                throw new ArgumentNullException(nameof(entityType));
+            if (dbTransaction == null) throw new ArgumentNullException(nameof(dbTransaction));
+
+            RunCore(dbContext, entityType, entities, matchExpression, updateExpression, updateCondition, queryOptions);
+            var i = await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+            return i;
         }
     }
 }
